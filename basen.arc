@@ -47,7 +47,7 @@
 
 ;
 ;returns the string representation of (base2ten b)
-(def base2ten-string (b) (coerce (base2ten (s-to-l b)) 'string))
+(def base2ten-string (b) (coerce (base2ten (coerce b 'cons)) 'string))
 
 ;
 ;returns the base-10 number represented by b in base.

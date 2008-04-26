@@ -22,33 +22,47 @@
 
 (mac urlpost body
   `(center
-	(gentag img src "urlnows4.png")
+	(gentag img src "urlnows5.png")
 	(br 2)
        (widtable 600
 		 (tag b (link urlnows-title* "url"))
 		 (br 2)
 		 ,@body
 		 (br 2)
-		 (w/bars (link "url") (link "see urls" "urls")))))
+		 (w/bars (link "Preview") (link "Explanation") (link "About")))))
   ;(pr (p 'text)))
+
+(mac urlcss (req .body)
+  `(center
+		(gentag img src "urlnows5.png")
+		(tag (title) (pr "URLNOWS"))
+		(tag (head) (tag (link rel "shortcut icon" href "/u.ico")))
+		,@body
+		;footer
+))
+
 
 (defop url req
        	   (center
-		(gentag img src "urlnows4.png")
+		(gentag img src "urlnows5.png")
+		(tag (title) (pr "URLNOWS"))
+		(tag (head) (tag (link rel "shortcut icon" href "/u.ico")))
 	  	(aform (fn (req) (urlpost (map [pr _]
 			   	 	  (br 2) 
-				    	  (underlink (shortlink (+ "http://" urlnows-site* "/" (cadr (get-id (arg req "urltext")))))))))
+				    	  (underlink (shortlink (+ "http://" urlnows-site* "/" (car (insert-url (arg req "urltext")))))))))
 		 (br2)
-		 (textarea "urltext" 1 48 (pr "http://"))
-		 (but "url" "submit"))))
+		 (pr "urlnows ")
+		 (input "urltext" "http://" 64)
+		 (but "reduce" "urlsubmit"))))
        
 (def usv ((o port 8080))
-  (open-db)
-  (asv port))
+  (init-urlnows-backend)
+  (thread (asv port)))
 
 ;redefine respond so it works properly with our ninja operators
 (def respond (str op args cooks ip (o type))
   (w/stdout str
+;(let outf (outfile "/Users/jmatt/dev/urlnows/usv.log" 'append) (w/stdout outf (w/bars (pr str) (pr op) (pr args) (pr cooks) (pr ip) (prn))))
     (aif (srvops* op)
           (let req (inst 'request 'args args 'cooks cooks 'ip ip)
             (if (redirector* op)
@@ -61,10 +75,17 @@
           (if (is type 'head)
             (do (prn (header (filemime it))) (prn))
             (respond-file str it))
-	 (if (let load-url (get-url (coerce op 'string))
+	 (if (withs (p-op (parseops op) 
+		     basen-id (car p-op)
+		     rest (cadr p-op)
+		     load-url (if (or rest args)
+				  (+ (+ (get-url (coerce basen-id 'string)) rest) (eval `(let req (obj args ',args) (reassemble-args req))))
+				  (get-url (coerce basen-id 'string))))
 	       (if (isnt load-url nil)
 		   ; get  (respond o op args cooks ip type)
-		   (do (prn rdheader*) (prn "Location: " (car (cdr (car load-url)))) (prn))
+		   (do (prn rdheader*) (prn "Location: " load-url) (prn))
+		       ;(let outf (outfile "/Users/jmatt/dev/urlnows/usv+.log" 'append) (w/stdout outf (w/bars (pr str) (pr op) (pr args) (pr cooks) (pr ip) (prn) (pr p-op) (pr basen-id) (pr rest) (pr load-url)))))
+
 		   ;(do (prn rdheader*) (prn "Location: " (cdr (car load-url))) (prn))
 		     ;(prn rdheader*) (prn "Location: " (o str (cdr (car load-url)))) (prn))
 		   ; (prn "str " str) (prn "req " req) (prn "ip" ip) (prn load-url)) 
@@ -74,3 +95,12 @@
 		   (if (is type 'head)
 		       (do (prn (err-header 404)) (prn))
 		       (respond-err str 404 unknown-msg*))))))))
+
+
+(def parseops (ops) 
+  (let s (coerce ops 'string)
+  (map (fn (l) (coerce l 'string))
+       (let pos (posmatch (fn (_) (no (alphadig _))) s)
+       (if pos 
+	   (split (coerce s 'cons) pos) 
+	   (list s))))))
