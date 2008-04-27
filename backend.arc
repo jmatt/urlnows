@@ -54,7 +54,7 @@
 (def init-current-id ()
   (let cid  (car (mergesort > (keys ids)))
     (if cid 
-      (= current-id (coerce cid 'int))
+      (= current-id (base2ten (coerce cid 'cons)))
       (= current-id 0))))
 
 ;;given the basen id this will return the url string.

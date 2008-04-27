@@ -14,7 +14,7 @@
 ;(urlnowsop urlform ()
 ;	   (vars-form (urlnows-fields) ))
 
-(= urlnows-site* "localhost:8080")
+(= urlnows-site* "localhost:8008")
 (= rootdir* "/Users/jmatt/dev/urlnows/urlnows_public_html/")
 (= urlnows-title* "urlNOWs")
 
@@ -22,15 +22,20 @@
 
 (mac urlpost body
   `(center
-	(gentag img src "urlnows5.png")
-	(br 2)
-       (widtable 600
-		 (tag b (link urlnows-title* "url"))
-		 (br 2)
-		 ,@body
-		 (br 2)
-		 (w/bars (link "Preview") (link "Explanation") (link "About")))))
-  ;(pr (p 'text)))
+     (tag (title) (pr "URLNOWS"))
+     (tag (head) (tag (link rel "shortcut icon" href "/u.ico")))
+     ;    (tag (a) (href "url") 
+     (gentag img src "urlnows5.png")
+     ;)
+     (br 2)
+     ;(widtable 600
+     ;(tag b (link urlnows-title* "url"))
+     (br 2)
+     ,@body
+     (br 2)
+     ;(w/bars (link "Preview") (link "Explanation") (link "About")))))
+     ;(pr (p 'text)))
+     (pr "© urlno.ws")))
 
 (mac urlcss (req .body)
   `(center
@@ -51,9 +56,11 @@
 			   	 	  (br 2) 
 				    	  (underlink (shortlink (+ "http://" urlnows-site* "/" (car (insert-url (arg req "urltext")))))))))
 		 (br2)
-		 (pr "urlnows ")
+		 (pr "urlnows   ")
 		 (input "urltext" "http://" 64)
-		 (but "reduce" "urlsubmit"))))
+		 (but "reduce" "urlsubmit")
+		 (br 2)
+		 (pr "© urlno.ws"))))
        
 (def usv ((o port 8080))
   (init-urlnows-backend)
